@@ -1396,7 +1396,7 @@ class _ProductScreenState extends State<ProductScreen> {
         const SizedBox(height: 28),
         FycoButton(
           expand: true,
-          label: 'AJOUTER AU PANIER · ${_product.priceMad * _quantity} MAD',
+          label: 'AJOUTER AU PANIER · ${_priceMad * _quantity} MAD',
           icon: Icons.shopping_bag_outlined,
           onTap: _productActive && _variantAvailable ? () => _addToCart() : null,
         ),

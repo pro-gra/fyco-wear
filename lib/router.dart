@@ -2356,14 +2356,57 @@ class AdminScreen extends StatelessWidget {
             }
             if (adminSnap.data != true) {
               return Scaffold(
+                backgroundColor: FycoColors.background,
                 appBar: fycoAppBar(context),
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      'Accès réservé aux administrateurs FYCO. Contactez le propriétaire du projet pour activer votre accès.',
-                      textAlign: TextAlign.center,
-                      style: sans(14, weight: FontWeight.w600),
+                body: Container(
+                  width: double.infinity,
+                  color: FycoColors.background,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: FycoColors.line),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.lock_outline, size: 42, color: FycoColors.ink),
+                          const SizedBox(height: 18),
+                          Text('Accès administrateur requis', textAlign: TextAlign.center,
+                            style: serifDisplay(25, weight: FontWeight.w600)),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Vous êtes connecté, mais ce compte ne possède pas encore le droit administrateur FYCO.',
+                            textAlign: TextAlign.center,
+                            style: sans(14, color: FycoColors.inkMuted, height: 1.5),
+                          ),
+                          const SizedBox(height: 18),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(color: FycoColors.surfaceWarm, borderRadius: BorderRadius.circular(8)),
+                            child: Text(
+                              'À faire : attribuer le rôle Firebase custom claim admin = true à votre utilisateur, puis vous déconnecter et vous reconnecter.',
+                              textAlign: TextAlign.center,
+                              style: sans(12, color: FycoColors.ink, weight: FontWeight.w600, height: 1.5),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () async => FirebaseAuth.instance.signOut(),
+                              icon: const Icon(Icons.logout),
+                              label: const Text('Se déconnecter'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

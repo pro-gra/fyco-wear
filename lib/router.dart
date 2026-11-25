@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
+import 'admin_products.dart';
 
 // ============================================================================
 // 0. POINT D'ENTRÉE & CONFIGURATION DU THÈME
@@ -379,6 +380,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
     GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
     GoRoute(path: '/admin', builder: (context, state) => const AdminScreen()),
+    GoRoute(path: '/admin/products', builder: (context, state) => const AdminProductsScreen()),
   ],
 );
 
@@ -1257,14 +1259,41 @@ class _ProductScreenState extends State<ProductScreen> {
   late FycoColor _color;
   String _size = 'M';
   int _quantity = 1;
+  int _priceMad = 449;
+  int _originalPriceMad = 600;
+  bool _productActive = true;
+  bool _inventoryManaged = false;
+  Map<String, int> _inventory = {};
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _productSubscription;
 
   @override
   void initState() {
     super.initState();
     _color = _product.colorById(widget.initialColorId);
+    _productSubscription = FirebaseFirestore.instance.collection('store_products').doc(_product.id).snapshots().listen((snapshot) {
+      final data = snapshot.data();
+      if (data == null || !mounted) return;
+      final rawInventory = (data['inventory'] as Map?)?.cast<String, dynamic>() ?? {};
+      setState(() {
+        _priceMad = (data['priceMad'] as num?)?.toInt() ?? _priceMad;
+        _originalPriceMad = (data['originalPriceMad'] as num?)?.toInt() ?? _originalPriceMad;
+        _productActive = data['active'] as bool? ?? true;
+        _inventoryManaged = data.containsKey('inventory');
+        _inventory = rawInventory.map((key, value) => MapEntry(key, (value as num).toInt()));
+      });
+    });
   }
 
+  @override
+  void dispose() {
+    _productSubscription?.cancel();
+    super.dispose();
+  }
+
+  bool get _variantAvailable => !_inventoryManaged || (_inventory['${_color.id}__$_size'] ?? 0) > 0;
+
   void _addToCart({bool checkout = false}) {
+    if (!_productActive || !_variantAvailable) return;
     FycoCart.instance.add(_product, _color, _size, quantity: _quantity);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: FycoColors.ink,
@@ -1290,14 +1319,15 @@ class _ProductScreenState extends State<ProductScreen> {
         Text(_product.name, style: serifDisplay(desktop ? 42 : 30, weight: FontWeight.w500)),
         const SizedBox(height: 8),
         Text(_product.tagline, style: sans(14, color: FycoColors.inkMuted, height: 1.4)),
+        if (!_productActive) Padding(padding: const EdgeInsets.only(top: 12), child: Text('Produit temporairement indisponible.', style: sans(13, color: FycoColors.danger, weight: FontWeight.w700))),
         const SizedBox(height: 18),
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Text('${_product.priceMad} MAD', style: sans(24, weight: FontWeight.w700, color: FycoColors.danger)),
+            Text('$_priceMad MAD', style: sans(24, weight: FontWeight.w700, color: FycoColors.danger)),
             const SizedBox(width: 12),
-            Text('${_product.originalPriceMad} MAD', style: sans(18, weight: FontWeight.w500, color: FycoColors.inkMuted).copyWith(decoration: TextDecoration.lineThrough)),
+            Text('$_originalPriceMad MAD', style: sans(18, weight: FontWeight.w500, color: FycoColors.inkMuted).copyWith(decoration: TextDecoration.lineThrough)),
             const SizedBox(width: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -1328,6 +1358,7 @@ class _ProductScreenState extends State<ProductScreen> {
         ),
         const SizedBox(height: 24),
         Text('TAILLE', style: overline(size: 10.5, color: FycoColors.ink)),
+        if (_inventoryManaged && !_variantAvailable) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('Cette combinaison est en rupture de stock.', style: sans(12, color: FycoColors.danger, weight: FontWeight.w700))),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -1362,14 +1393,14 @@ class _ProductScreenState extends State<ProductScreen> {
           expand: true,
           label: 'AJOUTER AU PANIER · ${_product.priceMad * _quantity} MAD',
           icon: Icons.shopping_bag_outlined,
-          onTap: () => _addToCart(),
+          onTap: _productActive && _variantAvailable ? () => _addToCart() : null,
         ),
         const SizedBox(height: 10),
         FycoButton(
           expand: true,
           inverted: true,
           label: 'COMMANDER MAINTENANT',
-          onTap: () => _addToCart(checkout: true),
+          onTap: _productActive && _variantAvailable ? () => _addToCart(checkout: true) : null,
         ),
         const SizedBox(height: 18),
         Row(
@@ -2419,8 +2450,9 @@ class _AdminDashboardState extends State<_AdminDashboard> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('Tableau de Bord des Commandes', style: sans(16, weight: FontWeight.w700)),
+        title: Text('Tableau de Bord FYCO', style: sans(16, weight: FontWeight.w700)),
         actions: [
+          TextButton.icon(onPressed: () => context.push('/admin/products'), icon: const Icon(Icons.inventory_2_outlined, size: 17), label: Text('Produits & stock', style: sans(13, color: FycoColors.ink))),
           TextButton(onPressed: () => FirebaseAuth.instance.signOut(), child: Text('Déconnexion', style: sans(13, color: FycoColors.ink))),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'constants.dart';
 
 class AppUtils {
   static String formatCurrency(double amount) {

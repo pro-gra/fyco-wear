@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_web_plugins/url_strategy.dart'; // <-- 1. Import this
 import 'firebase_options.dart';
 import 'router.dart';
@@ -8,6 +9,7 @@ import 'constants.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy(); // <-- 2. Call this before Firebase & runApp
+  await initializeDateFormatting('fr_FR', null);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

@@ -308,7 +308,6 @@ class _RevenueChart extends StatelessWidget {
   @override Widget build(BuildContext context){
     final now=DateTime.now(); final count=days==7?7:30; final values=List<double>.filled(count,0);
     for(final doc in docs){final d=doc.data();if(d['status']!='delivered')continue;final date=dateOf(d);if(date==null)continue;final age=now.difference(date).inDays;if(age>=0&&age<count)values[count-1-age]+=amountOf(d);}
-    final maxValue=values.fold<double>(0,math.max);
     return CustomPaint(painter:_LinePainter(values),child:Column(children:[Expanded(child:Container()),Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Text(days==7?'J-${count-1}':'30 jours',style:const TextStyle(fontSize:9,color:Color(0xFF99938C))),const Text('Aujourd’hui',style:TextStyle(fontSize:9,color:Color(0xFF99938C)))])]));
   }
 }
@@ -345,12 +344,21 @@ class _DemandBars extends StatelessWidget{
     return Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
       const Text('COULEURS',style:TextStyle(fontSize:9,letterSpacing:1.4,fontWeight:FontWeight.w900,color:Color(0xFF77736F))),
       const SizedBox(height:8),
-      for(var i=0;i<math.min(3,entries.length);i++)_bar(entries[i].key,entries[i].value,entries.first.value,palette[i%palette.length]),
+      for(var i=0;i<math.min(3,entries.length);i++)_bar(entries[i].key,entries[i].value,entries.first.value,_swatch(entries[i].key,palette[i%palette.length])),
       const SizedBox(height:13),
       const Text('TAILLES',style:TextStyle(fontSize:9,letterSpacing:1.4,fontWeight:FontWeight.w900,color:Color(0xFF77736F))),
       const SizedBox(height:8),
       Wrap(spacing:8,children:sizeEntries.take(5).map((e)=>Container(padding:const EdgeInsets.symmetric(horizontal:11,vertical:7),decoration:BoxDecoration(color:const Color(0xFFF6F3EE),borderRadius:BorderRadius.circular(8)),child:Text('${e.key}  ·  ${e.value}',style:const TextStyle(fontSize:11,fontWeight:FontWeight.w800,color:Color(0xFF171717)))).toList()),
     ]);
   }
-  Widget _bar(String label,int value,int max,Color color)=>Padding(padding:const EdgeInsets.only(bottom:7),child:Row(children:[SizedBox(width:92,child:Text(label,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,color:Color(0xFF171717)))),Expanded(child:ClipRRect(borderRadius:BorderRadius.circular(10),child:LinearProgressIndicator(value:max==0?0:value/max,minHeight:8,color:color,backgroundColor:const Color(0xFFF0ECE7)))),const SizedBox(width:8),Text('$value',style:const TextStyle(fontSize:11,fontWeight:FontWeight.w800,color:Color(0xFF171717)))]));
+  Color _swatch(String name, Color fallback) {
+    final n=name.toLowerCase();
+    if(n.contains('white')||n.contains('blanc')||n.contains('milk')) return const Color(0xFFE8E2D8);
+    if(n.contains('choc')||n.contains('brown')||n.contains('brun')) return const Color(0xFF795548);
+    if(n.contains('pink')||n.contains('rose')||n.contains('éclat')) return const Color(0xFFE69AAE);
+    if(n.contains('black')||n.contains('noir')) return const Color(0xFF242424);
+    if(n.contains('blue')||n.contains('bleu')) return const Color(0xFF7799C2);
+    return fallback;
+  }
+  Widget _bar(String label,int value,int max,Color color)=>Padding(padding:const EdgeInsets.only(bottom:7),child:Row(children:[Container(width:13,height:13,decoration:BoxDecoration(color:color,shape:BoxShape.circle,border:Border.all(color:const Color(0x22000000)))),const SizedBox(width:8),SizedBox(width:82,child:Text(label,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,color:Color(0xFF171717)))),Expanded(child:ClipRRect(borderRadius:BorderRadius.circular(10),child:LinearProgressIndicator(value:max==0?0:value/max,minHeight:8,color:color,backgroundColor:const Color(0xFFF0ECE7)))),const SizedBox(width:8),Text('$value',style:const TextStyle(fontSize:11,fontWeight:FontWeight.w800,color:Color(0xFF171717)))]));
 }

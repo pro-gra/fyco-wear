@@ -307,7 +307,7 @@ class _RevenueChart extends StatelessWidget {
   const _RevenueChart({required this.docs,required this.days,required this.dateOf,required this.amountOf});
   @override Widget build(BuildContext context){
     final now=DateTime.now(); final count=days==7?7:30; final values=List<double>.filled(count,0);
-    for(final doc in docs){final d=doc.data();if(d['status']!='delivered')continue;final date=dateOf(d);if(date==null)continue;final age=now.difference(date).inDays;if(age>=0&&age<count)values[count-1-age]+=amountOf(d);}
+    for(final doc in docs){final d=doc.data();if(d['status']!='delivered')continue;final date=dateOf(d);if(date==null)continue;final age=now.difference(date).inDays;if(age>=0&&age<count)values[count-1-age]+=amountOf(d).toDouble();}
     return CustomPaint(painter:_LinePainter(values),child:Column(children:[Expanded(child:Container()),Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Text(days==7?'J-${count-1}':'30 jours',style:const TextStyle(fontSize:9,color:Color(0xFF99938C))),const Text('Aujourd’hui',style:TextStyle(fontSize:9,color:Color(0xFF99938C)))])]));
   }
 }
@@ -316,7 +316,7 @@ class _LinePainter extends CustomPainter{
   final List<double> values; _LinePainter(this.values);
   @override void paint(Canvas canvas,Size size){
     const left=4.0,right=4.0,top=10.0,bottom=12.0;final w=size.width-left-right,h=size.height-top-bottom;
-    final maxV=values.fold<double>(0,math.max);final ceiling=maxV==0?100:maxV*1.2;
+    final maxV=values.fold<double>(0,(a,b)=>a>b?a:b);final ceiling=maxV==0?100:maxV*1.2;
     final grid=Paint()..color=const Color(0xFFEFEAE4)..strokeWidth=1;
     for(var i=0;i<4;i++){final y=top+h*i/3;canvas.drawLine(Offset(left,y),Offset(size.width-right,y),grid);}
     final pts=<Offset>[];for(var i=0;i<values.length;i++){final x=left+(values.length==1?0:w*i/(values.length-1));final y=top+h-(values[i]/ceiling*h);pts.add(Offset(x,y));}

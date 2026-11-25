@@ -1294,7 +1294,12 @@ class _ProductScreenState extends State<ProductScreen> {
 
   void _addToCart({bool checkout = false}) {
     if (!_productActive || !_variantAvailable) return;
-    FycoCart.instance.add(_product, _color, _size, quantity: _quantity);
+    if (_inventoryManaged && _quantity > (_inventory['${_color.id}__$_size'] ?? 0)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('La quantité demandée dépasse le stock disponible.')));
+      return;
+    }
+    final liveProduct = FycoProduct(id: _product.id, name: _product.name, tagline: _product.tagline, priceMad: _priceMad, originalPriceMad: _originalPriceMad, colors: _product.colors, sizes: _product.sizes);
+    FycoCart.instance.add(liveProduct, _color, _size, quantity: _quantity);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: FycoColors.ink,
       content: Text('Ajouté au panier : ${_product.name} (${_color.name}, $_size)', style: sans(13, color: Colors.white)),

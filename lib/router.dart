@@ -2348,7 +2348,30 @@ class AdminScreen extends StatelessWidget {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         if (snap.data == null) return const _AdminLogin();
-        return const _AdminDashboard();
+        return FutureBuilder<bool>(
+          future: snap.data!.getIdTokenResult(true).then((token) => token.claims?['admin'] == true),
+          builder: (context, adminSnap) {
+            if (adminSnap.connectionState == ConnectionState.waiting) {
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            }
+            if (adminSnap.data != true) {
+              return Scaffold(
+                appBar: fycoAppBar(context),
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'Accès réservé aux administrateurs FYCO. Contactez le propriétaire du projet pour activer votre accès.',
+                      textAlign: TextAlign.center,
+                      style: sans(14, weight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return const _AdminDashboard();
+          },
+        );
       },
     );
   }

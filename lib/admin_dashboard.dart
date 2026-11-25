@@ -320,7 +320,15 @@ class _LinePainter extends CustomPainter{
     final grid=Paint()..color=const Color(0xFFEFEAE4)..strokeWidth=1;
     for(var i=0;i<4;i++){final y=top+h*i/3;canvas.drawLine(Offset(left,y),Offset(size.width-right,y),grid);}
     final pts=<Offset>[];for(var i=0;i<values.length;i++){final x=left+(values.length==1?0:w*i/(values.length-1));final y=top+h-(values[i]/ceiling*h);pts.add(Offset(x,y));}
-    if(pts.isEmpty)return;final path=Path()..moveTo(pts.first.dx,top+h)..lineTo(pts.first.dx,pts.first.dy);for(var i=1;i<pts.length;i++)path.lineTo(pts[i].dx,pts[i].dy);path.lineTo(pts.last.dx,top+h)..close();
+    if (pts.isEmpty) return;
+    final path = Path()
+      ..moveTo(pts.first.dx, top + h)
+      ..lineTo(pts.first.dx, pts.first.dy);
+    for (var i = 1; i < pts.length; i++) {
+      path.lineTo(pts[i].dx, pts[i].dy);
+    }
+    path.lineTo(pts.last.dx, top + h);
+    path.close();
     canvas.drawPath(path,Paint()..shader=const LinearGradient(colors:[Color(0x55B77E78),Color(0x00B77E78)],begin:Alignment.topCenter,end:Alignment.bottomCenter).createShader(Rect.fromLTWH(0,top,size.width,h)));
     final linePath=Path()..moveTo(pts.first.dx,pts.first.dy);for(var i=1;i<pts.length;i++)linePath.lineTo(pts[i].dx,pts[i].dy);
     canvas.drawPath(linePath,Paint()..color=const Color(0xFFB77E78)..style=PaintingStyle.stroke..strokeWidth=2.8..strokeCap=StrokeCap.round..strokeJoin=StrokeJoin.round);
@@ -348,7 +356,28 @@ class _DemandBars extends StatelessWidget{
       const SizedBox(height:13),
       const Text('TAILLES',style:TextStyle(fontSize:9,letterSpacing:1.4,fontWeight:FontWeight.w900,color:Color(0xFF77736F))),
       const SizedBox(height:8),
-      Wrap(spacing:8,children:sizeEntries.take(5).map((e)=>Container(padding:const EdgeInsets.symmetric(horizontal:11,vertical:7),decoration:BoxDecoration(color:const Color(0xFFF6F3EE),borderRadius:BorderRadius.circular(8)),child:Text('${e.key}  ·  ${e.value}',style:const TextStyle(fontSize:11,fontWeight:FontWeight.w800,color:Color(0xFF171717)))).toList()),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final entry in sizeEntries.take(5))
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6F3EE),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${entry.key}  ·  ${entry.value}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF171717),
+                ),
+              ),
+            ),
+        ],
+      ),
     ]);
   }
   Color _swatch(String name, Color fallback) {

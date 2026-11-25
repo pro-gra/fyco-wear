@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
 import 'admin_products.dart';
+import 'admin_dashboard.dart';
 
 // ============================================================================
 // 0. POINT D'ENTRÉE & CONFIGURATION DU THÈME
@@ -380,7 +381,15 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
     GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
     GoRoute(path: '/admin', builder: (context, state) => const AdminScreen()),
-    GoRoute(path: '/admin/products', builder: (context, state) => const AdminProductsScreen()),
+    GoRoute(path: '/admin/products', builder: (context, state) => Theme(
+      data: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: const Color(0xFFF6F3EE),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFB77E78), brightness: Brightness.light),
+        textTheme: ThemeData.light().textTheme.apply(bodyColor: const Color(0xFF171717), displayColor: const Color(0xFF171717)),
+        appBarTheme: const AppBarTheme(backgroundColor: Colors.white, foregroundColor: Color(0xFF171717), elevation: 0, surfaceTintColor: Colors.transparent),
+      ),
+      child: const AdminProductsScreen(),
+    )),
   ],
 );
 
@@ -2412,7 +2421,7 @@ class AdminScreen extends StatelessWidget {
                 ),
               );
             }
-            return const _AdminDashboard();
+            return const FycoAdminDashboard();
           },
         );
       },

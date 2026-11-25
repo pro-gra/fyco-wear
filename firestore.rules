@@ -1,6 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Product information is public; only trusted administrators can change it.
+    match /store_products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Existing order permissions are retained for compatibility with the current
+    // guest checkout and tracking flow. Replace these with validated server-side
+    // order creation and private customer/admin reads before production launch.
     match /orders/{orderId} {
       allow read, write: if true;
     }

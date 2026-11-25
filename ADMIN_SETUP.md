@@ -15,7 +15,7 @@ Admin access is controlled by a Firebase Authentication custom claim. Do not put
    cd ..
    # PowerShell:
    $env:FIREBASE_PROJECT_ID="YOUR_FIREBASE_PROJECT_ID"
-   node scripts/set-admin.js "FIREBASE_AUTH_UID"
+   node functions/scripts/set-admin.js "FIREBASE_AUTH_UID"
    ```
 
 4. Sign out of FYCO and sign back in. Then open `/admin` and choose **Produits & stock**.
